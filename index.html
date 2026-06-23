@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="تطبيق 100 يوم مع حالي - تتبع يومياتك وأهدافك لمدة 100 يوم">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="100 يوم مع حالي">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <title>100 يوم مع حالي</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-form: #1e293b;
+            --text: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99,102,241,0.3);
+            --gold: #f59e0b;
+            --gold-glow: rgba(245,158,11,0.3);
+            --success: #22c55e;
+            --success-bg: rgba(34,197,94,0.15);
+            --danger: #ef4444;
+            --danger-bg: rgba(239,68,68,0.15);
+            --border: #334155;
+            --shadow: 0 4px 24px rgba(0,0,0,0.3);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s ease;
+        }
+        :root.light {
+            --bg: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-form: #f1f5f9;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+            --gold: #d97706;
+            --gold-glow: rgba(217,119,6,0.15);
+            --success-bg: rgba(34,197,94,0.1);
+            --danger-bg: rgba(239,68,68,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Segoe UI','Cairo',Tahoma,sans-serif;
+            background:var(--bg); color:var(--text);
+            min-height:100vh; transition:background var(--transition),color var(--transition);
+            line-height:1.6; -webkit-tap-highlight-color:transparent;
+        }
+        .app { max-width:720px; margin:0 auto; padding:16px 16px 100px; }
+        .header { text-align:center; padding:24px 0 12px; position:relative; }
+        .header h1 {
+            font-size:2rem; font-weight:800;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .header .subtitle { color:var(--text-secondary); font-size:0.9rem; margin-top:2px; }
+        .header-actions { position:absolute; top:24px; left:0; display:flex; gap:8px; }
+        .btn-icon {
+            background:var(--bg-card); border:1px solid var(--border); color:var(--text);
+            width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:1.1rem;
+            display:flex; align-items:center; justify-content:center; transition:all var(--transition);
+        }
+        .btn-icon:hover { border-color:var(--accent); box-shadow:0 0 12px var(--accent-glow); }
+        .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0; }
+        .stat-card {
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:16px 12px; text-align:center;
+            transition:all var(--transition); box-shadow:var(--shadow);
+        }
+        .stat-card .stat-value {
+            font-size:2rem; font-weight:800;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .stat-card .stat-label { font-size:0.78rem; color:var(--text-secondary); margin-top:4px; }
+        .stat-card.streak-active { border-color:var(--accent); box-shadow:0 0 20px var(--accent-glow); }
+        .badges-section { margin:12px 0; }
+        .badges-section h3 { font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .badges-row { display:flex; gap:10px; flex-wrap:wrap; }
+        .badge {
+            display:flex; align-items:center; gap:6px; padding:8px 14px;
+            border-radius:50px; font-size:0.82rem; font-weight:600;
+            border:2px solid var(--border); background:var(--bg-card);
+            color:var(--text-muted); transition:all var(--transition); white-space:nowrap;
+        }
+        .badge.earned { border-color:var(--gold); color:var(--gold); background:var(--gold-glow); animation:badgePop 0.5s ease; }
+        @keyframes badgePop { 0%{transform:scale(1)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
+        .card {
+            background:var(--bg-card); border:1px solid var(--border);
+            border-radius:var(--radius); padding:20px; margin:16px 0; box-shadow:var(--shadow);
+        }
+        .card h2 { font-size:1.15rem; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:0.85rem; color:var(--text-secondary); margin-bottom:6px; font-weight:600; }
+        textarea {
+            width:100%; min-height:100px; background:var(--bg-form); border:1px solid var(--border);
+            border-radius:var(--radius-sm); color:var(--text); padding:12px;
+            font-family:inherit; font-size:0.95rem; resize:vertical; transition:border var(--transition);
+        }
+        textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+        .rating-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+        .rating-stars { display:flex; gap:2px; direction:ltr; flex-wrap:wrap; }
+        .rating-stars .star { font-size:1.6rem; cursor:pointer; color:var(--text-muted); transition:all 0.15s ease; user-select:none; }
+        .rating-stars .star.active { color:var(--gold); }
+        .rating-stars .star:hover { transform:scale(1.2); }
+        .rating-number { font-weight:800; font-size:1.3rem; min-width:28px; text-align:center; color:var(--gold); }
+        .checkbox-group { display:flex; align-items:center; gap:10px; }
+        .checkbox-group input[type="checkbox"] { width:22px; height:22px; accent-color:var(--accent); cursor:pointer; }
+        .checkbox-group label { margin-bottom:0; cursor:pointer; font-size:0.9rem; }
+        .btn {
+            display:inline-flex; align-items:center; justify-content:center; gap:8px;
+            padding:12px 28px; border-radius:50px; border:none; font-family:inherit;
+            font-size:0.95rem; font-weight:700; cursor:pointer; transition:all var(--transition); width:100%;
+        }
+        .btn-primary { background:linear-gradient(135deg,var(--accent),#7c3aed); color:white; box-shadow:0 4px 16px var(--accent-glow); }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 24px var(--accent-glow); }
+        .btn-primary:active { transform:translateY(0); }
+        .today-status { text-align:center; color:var(--success); font-weight:600; font-size:0.9rem; margin-top:10px; display:none; }
+        .today-status.show { display:block; }
+        .calendar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+        .calendar-header .month-label { font-weight:700; font-size:1.05rem; }
+        .calendar-nav { display:flex; gap:6px; }
+        .calendar-nav button { background:var(--bg-form); border:1px solid var(--border); color:var(--text); width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:1rem; transition:all var(--transition); }
+        .calendar-nav button:hover { border-color:var(--accent); }
+        .weekdays { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-bottom:6px; }
+        .days-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+        .day-cell {
+            aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+            border-radius:var(--radius-sm); font-size:0.85rem; font-weight:600; cursor:pointer;
+            transition:all 0.2s ease; position:relative; background:var(--bg-form); color:var(--text);
+            border:1px solid transparent;
+        }
+        .day-cell:hover { border-color:var(--accent); }
+        .day-cell.other-month { opacity:0.3; pointer-events:none; }
+        .day-cell.today { border:2px solid var(--accent); box-shadow:0 0 12px var(--accent-glow); }
+        .day-cell.goal-done { background:var(--success-bg); border-color:var(--success); }
+        .day-cell.goal-missed { background:var(--danger-bg); border-color:var(--danger); }
+        .day-cell .dot { width:6px; height:6px; border-radius:50%; margin-top:2px; }
+        .day-cell.goal-done .dot { background:var(--success); }
+        .day-cell.goal-missed .dot { background:var(--danger); }
+        .stats-detail { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+        .stat-item { background:var(--bg-form); border-radius:var(--radius-sm); padding:12px; text-align:center; }
+        .stat-item .val { font-size:1.5rem; font-weight:800; color:var(--accent); }
+        .stat-item .lbl { font-size:0.75rem; color:var(--text-secondary); margin-top:2px; }
+        .top-days { margin-top:12px; }
+        .top-days h4 { font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px; }
+        .top-day-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--bg-form); border-radius:var(--radius-sm); margin-bottom:6px; }
+        .top-day-item .day-rank { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; background:linear-gradient(135deg,var(--accent),var(--gold)); color:white; flex-shrink:0; }
+        .top-day-item .day-info { flex:1; min-width:0; }
+        .top-day-item .day-date { font-weight:600; font-size:0.9rem; }
+        .top-day-item .day-excerpt { font-size:0.78rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .top-day-item .day-rating { font-weight:800; font-size:1.1rem; color:var(--gold); flex-shrink:0; }
+        .toast {
+            position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(100px);
+            background:var(--bg-card); border:1px solid var(--accent); color:var(--text);
+            padding:12px 24px; border-radius:50px; font-weight:600; font-size:0.9rem;
+            box-shadow:0 8px 32px rgba(0,0,0,0.4); z-index:1000;
+            transition:transform 0.4s ease; white-space:nowrap; direction:rtl; max-width:90vw; overflow:hidden; text-overflow:ellipsis;
+        }
+        .toast.show { transform:translateX(-50%) translateY(0); }
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0; background:var(--bg-card);
+            border-top:1px solid var(--border); display:flex; justify-content:space-around;
+            padding:10px 0; z-index:100; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+        }
+        .nav-item { display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; color:var(--text-muted); transition:color var(--transition); font-size:0.7rem; font-weight:600; background:none; border:none; font-family:inherit; }
+        .nav-item .nav-icon { font-size:1.4rem; }
+        .nav-item.active { color:var(--accent); }
+        .section { display:none; }
+        .section.active { display:block; }
+        .welcome-overlay { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 20px; min-height:100vh; background:var(--bg); }
+        .welcome-overlay .welcome-emoji { font-size:5rem; margin-bottom:16px; animation:float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        .welcome-overlay h2 { font-size:1.5rem; margin-bottom:8px; color:var(--text); }
+        .welcome-overlay p { color:var(--text-secondary); margin-bottom:24px; max-width:400px; }
+        .progress-bar-container { width:100%; height:8px; background:var(--bg-form); border-radius:4px; margin-top:12px; overflow:hidden; }
+        .progress-bar-fill { height:100%; background:linear-gradient(135deg,var(--accent),var(--gold)); border-radius:4px; transition:width 0.6s ease; }
+        .day-note { font-size:0.75rem; color:var(--text-muted); margin-top:4px; }
+        @media (max-width:480px) {
+            .app { padding:10px; }
+            .header h1 { font-size:1.5rem; }
+            .stats-row { gap:8px; }
+            .stat-card { padding:12px 8px; }
+            .stat-card .stat-value { font-size:1.5rem; }
+            .badges-row { gap:6px; }
+            .badge { padding:6px 10px; font-size:0.72rem; }
+            .day-cell { font-size:0.72rem; border-radius:8px; }
+            .stats-detail { grid-template-columns:1fr; }
+            .rating-stars .star { font-size:1.3rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Welcome Overlay -->
+<div class="welcome-overlay" id="welcomeOverlay" style="display:none">
+    <div class="welcome-emoji">📔</div>
+    <h2>أهلاً بك في رحلة 100 يوم!</h2>
+    <p>سجّل يومياتك يومياً، وحقق أهدافك، واربح الشارات التحفيزية. لنبدأ معاً!</p>
+    <button class="btn btn-primary" id="startJourneyBtn" style="width:auto;padding:14px 40px;">🚀 ابدأ الرحلة</button>
+</div>
+
+<div class="app" id="appMain">
+    <header class="header">
+        <div class="header-actions">
+            <button class="btn-icon" id="themeToggle" title="تبديل الوضع">🌙</button>
+            <button class="btn-icon" id="installBtn" title="تثبيت التطبيق" style="display:none;font-size:0.75rem;gap:4px;width:auto;padding:0 12px;border-radius:20px;">📲 تثبيت</button>
+        </div>
+        <h1 dir="ltr">💯 100 يوم مع حالي</h1>
+        <p class="subtitle">رحلة 100 يوم من التطوير الذاتي</p>
+        <div class="day-note" id="dayCounter">اليوم #1 من 100</div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card streak-active" id="streakCard">
+            <div class="stat-value" id="streakCount">0</div>
+            <div class="stat-label">🔥 أيام متتالية</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="completionPercent">0%</div>
+            <div class="stat-label">📊 نسبة الإنجاز</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="daysDone">0</div>
+            <div class="stat-label">✅ أيام مكتملة</div>
+        </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="badges-section">
+        <h3>🏅 الشارات</h3>
+        <div class="badges-row" id="badgesRow">
+            <span class="badge" data-streak="7">🌟 7 أيام</span>
+            <span class="badge" data-streak="21">🔥 21 يوم</span>
+            <span class="badge" data-streak="50">💪 50 يوم</span>
+            <span class="badge" data-streak="100">👑 100 يوم</span>
+        </div>
+    </div>
+
+    <!-- Section: Journal -->
+    <div class="section active" id="sectionJournal">
+        <div class="card">
+            <h2>📝 تدوين اليوم</h2>
+            <div class="today-status" id="todayStatus"></div>
+            <div class="form-group">
+                <label>ماذا حدث اليوم؟ كيف كان شعورك؟</label>
+                <textarea id="journalText" placeholder="اكتب هنا خواطرك وأفكارك لهذا اليوم..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>تقييم اليوم (1-10)</label>
+                <div class="rating-row">
+                    <div class="rating-stars" id="ratingStars">
+                        <span class="star" data-rating="1">⭐</span><span class="star" data-rating="2">⭐</span>
+                        <span class="star" data-rating="3">⭐</span><span class="star" data-rating="4">⭐</span>
+                        <span class="star" data-rating="5">⭐</span><span class="star" data-rating="6">⭐</span>
+                        <span class="star" data-rating="7">⭐</span><span class="star" data-rating="8">⭐</span>
+                        <span class="star" data-rating="9">⭐</span><span class="star" data-rating="10">⭐</span>
+                    </div>
+                    <span class="rating-number" id="ratingDisplay">0</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="goalCheck">
+                    <label for="goalCheck">✅ أنجزت هدفي الرئيسي لهذا اليوم</label>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="saveEntryBtn">💾 حفظ اليوم</button>
+            <button class="btn" id="deleteEntryBtn" style="background:var(--danger-bg);color:var(--danger);margin-top:8px;display:none;">🗑️ حذف تسجيل اليوم</button>
+        </div>
+    </div>
+
+    <!-- Section: Calendar -->
+    <div class="section" id="sectionCalendar">
+        <div class="card">
+            <h2>📅 التقويم التفاعلي</h2>
+            <div class="calendar-header">
+                <span class="month-label" id="monthLabel">يناير 2026</span>
+                <div class="calendar-nav">
+                    <button id="prevMonth">◀</button>
+                    <button id="todayBtn">📍</button>
+                    <button id="nextMonth">▶</button>
+                </div>
+            </div>
+            <div class="weekdays">
+                <span>أحد</span><span>إثنين</span><span>ثلاثاء</span><span>أربعاء</span><span>خميس</span><span>جمعة</span><span>سبت</span>
+            </div>
+            <div class="days-grid" id="daysGrid"></div>
+            <div style="display:flex;gap:16px;margin-top:12px;font-size:0.75rem;justify-content:center;color:var(--text-secondary);flex-wrap:wrap;">
+                <span>🟢 أنجزت الهدف</span><span>🔴 فاتني الهدف</span><span>⚪ لم أسجل</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Statistics -->
+    <div class="section" id="sectionStats">
+        <div class="card">
+            <h2>📊 الإحصائيات</h2>
+            <div class="stats-detail">
+                <div class="stat-item">
+                    <div class="val" id="statTotalEntries">0</div>
+                    <div class="lbl">إجمالي الأيام المسجلة</div>
+                </div>
+                <div class="stat-item">
+                    <div class="val" id="statAvgRating">0</div>
+                    <div class="lbl">متوسط التقييم</div>
+                </div>
+                <div class="stat-item">
+                    <div class="val" id="statBestDay">-</div>
+                    <div class="lbl">أفضل يوم (تقييم)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="val" id="statGoalRate">0%</div>
+                    <div class="lbl">نسبة تحقيق الأهداف</div>
+                </div>
+            </div>
+            <div class="top-days">
+                <h4>🏆 أفضل 3 أيام</h4>
+                <div id="topDaysList">
+                    <p style="color:var(--text-muted);text-align:center;padding:16px">لا توجد بيانات كافية بعد</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item active" data-section="sectionJournal">
+        <span class="nav-icon">📝</span><span>تدوين</span>
+    </button>
+    <button class="nav-item" data-section="sectionCalendar">
+        <span class="nav-icon">📅</span><span>التقويم</span>
+    </button>
+    <button class="nav-item" data-section="sectionStats">
+        <span class="nav-icon">📊</span><span>إحصائيات</span>
+    </button>
+</nav>
+
+<script>
+(function(){
+'use strict';
+
+var STORAGE_KEY = '100days_app';
+var THEME_KEY = '100days_theme';
+
+var appData = { days:{}, startDate:null, notificationsGranted:false };
+var currentRating = 0;
+var calendarMonth = new Date().getMonth();
+var calendarYear = new Date().getFullYear();
+var todayStr = getDS(new Date());
+var deferredPrompt = null;
+
+function getDS(d) {
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function fmtAr(d) {
+    var m = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    return d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();
+}
+
+// Load/Save
+function ld() {
+    var r = localStorage.getItem(STORAGE_KEY);
+    if(r){try{appData=JSON.parse(r);}catch(e){appData={days:{},startDate:null,notificationsGranted:false};}}
+    if(!appData.days)appData.days={};
+    if(!appData.startDate&&Object.keys(appData.days).length>0)appData.startDate=Object.keys(appData.days).sort()[0];
+    todayStr=getDS(new Date());
+}
+function sv(){localStorage.setItem(STORAGE_KEY,JSON.stringify(appData));}
+
+// Theme
+function thLoad(){
+    var s=localStorage.getItem(THEME_KEY);
+    if(s==='light'){document.documentElement.classList.add('light');byId('themeToggle').textContent='☀️';}
+    else{byId('themeToggle').textContent='🌙';}
+}
+function thToggle(){
+    var is=document.documentElement.classList.toggle('light');
+    localStorage.setItem(THEME_KEY,is?'light':'dark');
+    byId('themeToggle').textContent=is?'☀️':'🌙';
+}
+
+function byId(id){return document.getElementById(id);}
+function toast(m){
+    var t=byId('toast');t.textContent=m;t.classList.add('show');
+    clearTimeout(t._tid);t._tid=setTimeout(function(){t.classList.remove('show');},2800);
+}
+// Progress
+function updateProgress(){
+    var today = new Date();
+    if(!appData.startDate){
+        var k=Object.keys(appData.days).sort();
+        if(k.length===0){byId('dayCounter').textContent='اليوم #1 من 100';byId('progressBar').style.width='0%';return;}
+        appData.startDate=k[0];sv();
+    }
+    var start=new Date(appData.startDate+'T00:00:00');
+    var dayNum=Math.floor((today-start)/(1000*60*60*24))+1;
+    if(dayNum<1)dayNum=1;
+    if(dayNum>100)dayNum=100;
+    byId('dayCounter').textContent='اليوم #'+dayNum+' من 100';
+    byId('progressBar').style.width=dayNum+'%';
+}
+
+// Streak
+function streak(){
+    var t=new Date(),s=0,d=new Date(t);
+    while(true){
+        var ds=getDS(d),e=appData.days[ds];
+        if(e&&e.goalCompleted){s++;d.setDate(d.getDate()-1);}
+        else{if(ds===todayStr&&(!e||!e.goalCompleted))break;if(ds!==todayStr)break;break;}
+    }
+    return s;
+}
+
+function pct(){
+    var t=new Date();
+    if(!appData.startDate){var k=Object.keys(appData.days).sort();if(k.length===0)return 0;appData.startDate=k[0];sv();}
+    var start=new Date(appData.startDate+'T00:00:00');
+    var total=Math.floor((t-start)/(1000*60*60*24))+1;
+    if(total<=0)return 0;
+    var done=0;
+    for(var k in appData.days){if(appData.days[k].goalCompleted)done++;}
+    return Math.round((done/total)*100);
+}
+
+// Badges
+function bgUpdate(st){
+    var bs=document.querySelectorAll('.badge');
+    for(var i=0;i<bs.length;i++){
+        var b=bs[i];
+        if(st>=parseInt(b.dataset.streak))b.classList.add('earned');
+        else b.classList.remove('earned');
+    }
+}
+
+// Stats Row
+function stRow(){
+    var st=streak(),pc=pct();
+    var dd=0;for(var k in appData.days){if(appData.days[k].goalCompleted)dd++;}
+    byId('streakCount').textContent=st;
+    byId('completionPercent').textContent=pc+'%';
+    byId('daysDone').textContent=dd;
+    byId('streakCard').classList.toggle('streak-active',st>0);
+    bgUpdate(st);
+    updateProgress();
+}
+
+// Calendar
+function calRender(){
+    var mn=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    byId('monthLabel').textContent=mn[calendarMonth]+' '+calendarYear;
+    var g=byId('daysGrid');g.innerHTML='';
+    var fd=new Date(calendarYear,calendarMonth,1);
+    var ld=new Date(calendarYear,calendarMonth+1,0);
+    var sd=fd.getDay(),td=ld.getDate();
+    var tl=getDS(new Date());
+    var pld=new Date(calendarYear,calendarMonth,0).getDate();
+    for(var i=sd-1;i>=0;i--){
+        var c=document.createElement('div');c.className='day-cell other-month';c.textContent=pld-i;g.appendChild(c);
+    }
+    for(var d=1;d<=td;d++){
+        var c=document.createElement('div');c.className='day-cell';
+        var ds=calendarYear+'-'+String(calendarMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        c.textContent=d;
+        if(ds===tl)c.classList.add('today');
+        var en=appData.days[ds];
+        if(en){
+            c.classList.add(en.goalCompleted?'goal-done':'goal-missed');
+            var dot=document.createElement('span');dot.className='dot';c.appendChild(dot);
+        }
+        (function(ds,en){
+            c.addEventListener('click',function(){
+                if(en&&en.journal)toast(en.journal.substring(0,60)+(en.journal.length>60?'...':''));
+                else if(en)toast('تقييم '+en.rating+'/10 (الهدف: '+(en.goalCompleted?'✅':'❌')+')');
+            });
+        })(ds,en);
+        g.appendChild(c);
+    }
+    var rem=7-(g.children.length%7);
+    if(rem<7){for(var i=1;i<=rem;i++){var c=document.createElement('div');c.className='day-cell other-month';c.textContent=i;g.appendChild(c);}}
+}
+
+// Stats Panel
+function stPanel(){
+    var entries=Object.keys(appData.days).map(function(k){return [k,appData.days[k]];});
+    var total=entries.length;
+    byId('statTotalEntries').textContent=total;
+    var ratings=[];for(var i=0;i<entries.length;i++){if(entries[i][1].rating>0)ratings.push(entries[i][1].rating);}
+    byId('statAvgRating').textContent=ratings.length>0?(ratings.reduce(function(a,b){return a+b;},0)/ratings.length).toFixed(1):'0';
+    var best=null;for(var i=0;i<entries.length;i++){if(entries[i][1].rating>0&&(!best||entries[i][1].rating>best[1].rating))best=entries[i];}
+    byId('statBestDay').textContent=best?best[1].rating+'/10':'-';
+    var ge=0;for(var i=0;i<entries.length;i++){if(entries[i][1].goalCompleted)ge++;}
+    byId('statGoalRate').textContent=total>0?Math.round((ge/total)*100)+'%':'0%';
+    var top=entries.filter(function(e){return e[1].rating>0;}).sort(function(a,b){return b[1].rating-a[1].rating;}).slice(0,3);
+    var list=byId('topDaysList');
+    if(top.length===0){
+        list.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:16px">لا توجد بيانات كافية بعد</p>';
+    }else{
+        var medals=['🥇','🥈','🥉'];
+        list.innerHTML=top.map(function(e,i){
+            return '<div class="top-day-item"><div class="day-rank">'+medals[i]+'</div><div class="day-info"><div class="day-date">'+fmtAr(new Date(e[0]+'T00:00:00'))+'</div><div class="day-excerpt">'+(e[1].journal?e[1].journal.substring(0,40)+(e[1].journal.length>40?'...':''):'بدون ملاحظات')+'</div></div><div class="day-rating">'+e[1].rating+'/10</div></div>';
+        }).join('');
+    }
+}
+
+// Journal
+function jLoad(){
+    var e=appData.days[todayStr];
+    if(e){
+        byId('journalText').value=e.journal||'';
+        setRating(e.rating||0);
+        byId('goalCheck').checked=e.goalCompleted||false;
+        byId('todayStatus').classList.add('show');
+        byId('todayStatus').textContent='✓ تم تسجيل اليوم بنجاح! يمكنك التعديل وإعادة الحفظ 🎉';
+        byId('deleteEntryBtn').style.display='block';
+        byId('saveEntryBtn').textContent='🔄 تحديث اليوم';
+    }else{
+        byId('journalText').value='';
+        setRating(0);
+        byId('goalCheck').checked=false;
+        byId('todayStatus').classList.remove('show');
+        byId('deleteEntryBtn').style.display='none';
+        byId('saveEntryBtn').textContent='💾 حفظ اليوم';
+    }
+}
+
+function setRating(r){
+    currentRating=r;
+    byId('ratingDisplay').textContent=r;
+    var stars=document.querySelectorAll('#ratingStars .star');
+    for(var i=0;i<stars.length;i++){
+        stars[i].classList.toggle('active',parseInt(stars[i].dataset.rating)<=r);
+    }
+}
+
+function jSave(){
+    var j=byId('journalText').value.trim();
+    var r=currentRating;
+    var g=byId('goalCheck').checked;
+    if(!j&&r===0&&!g){toast('الرجاء إدخال ملاحظات أو تقييم على الأقل');return;}
+    if(!appData.startDate||todayStr<appData.startDate)appData.startDate=todayStr;
+    appData.days[todayStr]={journal:j,rating:r,goalCompleted:g,savedAt:new Date().toISOString()};
+    sv();refreshAll();
+    byId('todayStatus').classList.add('show');
+    byId('todayStatus').textContent='✓ تم الحفظ بنجاح! استمر على هذا المنوال 🚀';
+    byId('deleteEntryBtn').style.display='block';
+    byId('saveEntryBtn').textContent='🔄 تحديث اليوم';
+    var st=streak();
+    var bn={7:'🌟 البداية',21:'🔥 العادة',50:'💪 الالتزام',100:'👑 الأسطورة'};
+    if(bn[st]&&g)setTimeout(function(){toast('🏅 مبروك! حصلت على شارة "'+bn[st]+'"!');},800);
+    toast('✅ تم حفظ اليوم بنجاح!');
+    if(bn[st]&&g)bgUpdate(st);
+}
+
+function jDel(){
+    if(!confirm('هل أنت متأكد من حذف تسجيل اليوم؟'))return;
+    delete appData.days[todayStr];sv();
+    byId('journalText').value='';setRating(0);byId('goalCheck').checked=false;currentRating=0;
+    byId('todayStatus').classList.remove('show');byId('deleteEntryBtn').style.display='none';
+    byId('saveEntryBtn').textContent='💾 حفظ اليوم';
+    refreshAll();toast('🗑️ تم حذف تسجيل اليوم');
+}
+
+function refreshAll(){stRow();calRender();stPanel();}
+
+// Navigation
+function navTo(id){
+    var secs=document.querySelectorAll('.section');
+    for(var i=0;i<secs.length;i++)secs[i].classList.remove('active');
+    byId(id).classList.add('active');
+    var nis=document.querySelectorAll('.nav-item');
+    for(var i=0;i<nis.length;i++)nis[i].classList.remove('active');
+    document.querySelector('[data-section="'+id+'"]').classList.add('active');
+    if(id==='sectionCalendar')calRender();
+    if(id==='sectionStats')stPanel();
+}
+
+// Notifications
+function reqNotif(){
+    if(!('Notification' in window))return;
+    if(Notification.permission==='granted'){appData.notificationsGranted=true;sv();return;}
+    if(Notification.permission==='denied')return;
+    Notification.requestPermission().then(function(r){
+        if(r==='granted'){appData.notificationsGranted=true;sv();toast('🔔 تم تفعيل الإشعارات اليومية!');schedRemind();}
+    });
+}
+
+function schedRemind(){
+    if(!appData.notificationsGranted||!('Notification' in window)||Notification.permission!=='granted')return;
+    var n=new Date();
+    if(n.getHours()>=20&&!appData.days[todayStr]){
+        new Notification('💯 100 يوم مع حالي',{
+            body:'لا تنسَ تسجيل إنجازك اليوم! رحلتك مستمرة 🌟',
+            icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📔</text></svg>',
+            tag:'daily-reminder'
+        });
+    }
+}
+
+// Install PWA
+window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault();
+    deferredPrompt=e;
+    byId('installBtn').style.display='flex';
+    console.log('📲 PWA install ready — click the install button');
+    // Auto-show on mobile after 2 seconds
+    setTimeout(function(){
+        if(deferredPrompt) toast('📲 اضغط على زر التثبيت في الأعلى لتثبيت التطبيق!');
+    },3000);
+});
+
+byId('installBtn').addEventListener('click',async function(){
+    if(!deferredPrompt){
+        toast('جاري التثبيت... انتظر لحظة');
+        return;
+    }
+    try {
+        deferredPrompt.prompt();
+        var r=await deferredPrompt.userChoice;
+        console.log('Install result:', r.outcome);
+        if(r.outcome==='accepted'){
+            toast('📲 تم تثبيت التطبيق بنجاح!');
+            byId('installBtn').style.display='none';
+        } else {
+            toast('تم إلغاء التثبيت. يمكنك المحاولة لاحقاً');
+        }
+    } catch(err) {
+        console.error('Install error:', err);
+        toast('حدث خطأ في التثبيت. حاول مرة أخرى');
+    }
+    deferredPrompt=null;
+});
+
+// Also listen for appinstalled event
+window.addEventListener('appinstalled',function(){
+    console.log('✅ PWA installed successfully!');
+    byId('installBtn').style.display='none';
+    deferredPrompt=null;
+});
+
+// Welcome
+function checkFirst(){
+    if(!localStorage.getItem('100days_welcome')){
+        byId('welcomeOverlay').style.display='flex';
+        byId('appMain').style.display='none';
+        byId('bottomNav').style.display='none';
+    }
+}
+function dismissWelcome(){
+    localStorage.setItem('100days_welcome','1');
+    byId('welcomeOverlay').style.display='none';
+    byId('appMain').style.display='';
+    byId('bottomNav').style.display='';
+    reqNotif();
+}
+
+// Events
+byId('themeToggle').addEventListener('click',thToggle);
+byId('startJourneyBtn').addEventListener('click',dismissWelcome);
+byId('saveEntryBtn').addEventListener('click',jSave);
+byId('deleteEntryBtn').addEventListener('click',jDel);
+
+var stars=document.querySelectorAll('#ratingStars .star');
+for(var i=0;i<stars.length;i++){
+    stars[i].addEventListener('click',function(){setRating(parseInt(this.dataset.rating));});
+    stars[i].addEventListener('mouseenter',function(){
+        var v=parseInt(this.dataset.rating);
+        for(var j=0;j<stars.length;j++)stars[j].classList.toggle('active',parseInt(stars[j].dataset.rating)<=v);
+    });
+}
+byId('ratingStars').addEventListener('mouseleave',function(){setRating(currentRating);});
+
+var nis=document.querySelectorAll('.nav-item');
+for(var i=0;i<nis.length;i++){
+    nis[i].addEventListener('click',function(){navTo(this.dataset.section);});
+}
+
+byId('prevMonth').addEventListener('click',function(){calendarMonth--;if(calendarMonth<0){calendarMonth=11;calendarYear--;}calRender();});
+byId('nextMonth').addEventListener('click',function(){calendarMonth++;if(calendarMonth>11){calendarMonth=0;calendarYear++;}calRender();});
+byId('todayBtn').addEventListener('click',function(){calendarMonth=new Date().getMonth();calendarYear=new Date().getFullYear();calRender();});
+
+// Service Worker
+if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+        navigator.serviceWorker.register('sw.js').then(function(r){console.log('SW registered');}).catch(function(e){console.log('SW failed');});
+    });
+}
+
+// Init
+function init(){
+    ld();thLoad();jLoad();stRow();calRender();stPanel();
+    // Skip welcome screen if already installed as PWA (standalone mode)
+    if(window.matchMedia('(display-mode: standalone)').matches){
+        localStorage.setItem('100days_welcome','1');
+        byId('welcomeOverlay').style.display='none';
+        byId('appMain').style.display='';
+        byId('bottomNav').style.display='';
+    } else {
+        checkFirst();
+    }
+    document.addEventListener('click',function o(){if(Notification.permission==='default')reqNotif();},{once:true});
+    setInterval(schedRemind,30*60*1000);
+    setTimeout(schedRemind,5000);
+}
+init();
+})();
+</script>
+</body>
+</html>
