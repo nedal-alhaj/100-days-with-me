@@ -54,7 +54,7 @@
             min-height:100vh; transition:background var(--transition),color var(--transition);
             line-height:1.6; -webkit-tap-highlight-color:transparent;
         }
-        .app { max-width:720px; margin:0 auto; padding:16px 16px 100px; }
+        .app { max-width:720px; margin:0 auto; padding:16px 16px calc(100px + env(safe-area-inset-bottom, 20px)); }
         .header { text-align:center; padding:24px 0 12px; position:relative; }
         .header h1 {
             font-size:2rem; font-weight:800;
@@ -185,7 +185,7 @@
         .progress-bar-fill { height:100%; background:linear-gradient(135deg,var(--accent),var(--gold)); border-radius:4px; transition:width 0.6s ease; }
         .day-note { font-size:0.75rem; color:var(--text-muted); margin-top:4px; }
         @media (max-width:480px) {
-            .app { padding:10px; }
+            .app { padding:10px 10px calc(90px + env(safe-area-inset-bottom, 20px)); }
             .header h1 { font-size:1.5rem; }
             .stats-row { gap:8px; }
             .stat-card { padding:12px 8px; }
@@ -216,6 +216,7 @@
         <h1 dir="ltr">💯 100 يوم مع حالي</h1>
         <p class="subtitle">رحلة 100 يوم من التطوير الذاتي</p>
         <div class="day-note" id="dayCounter">اليوم #1 من 100</div>
+        <div class="day-note" id="startDateLabel" style="display:none;color:var(--accent);font-weight:600;"></div>
         <div class="progress-bar-container">
             <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
         </div>
@@ -277,7 +278,7 @@
                 </div>
             </div>
             <button class="btn btn-primary" id="saveEntryBtn">💾 حفظ اليوم</button>
-            <button class="btn" id="deleteEntryBtn" style="background:var(--danger-bg);color:var(--danger);margin-top:8px;display:none;">🗑️ حذف تسجيل اليوم</button>
+            <button class="btn" id="deleteEntryBtn" style="background:var(--danger-bg);color:var(--danger);margin-top:8px;margin-bottom:16px;display:none;">🗑️ حذف تسجيل اليوم</button>
         </div>
     </div>
 
@@ -415,6 +416,12 @@ function updateProgress(){
     if(dayNum>100)dayNum=100;
     byId('dayCounter').textContent='اليوم #'+dayNum+' من 100';
     byId('progressBar').style.width=dayNum+'%';
+    // Show start date
+    if(appData.startDate){
+        var sd=new Date(appData.startDate+'T00:00:00');
+        byId('startDateLabel').style.display='block';
+        byId('startDateLabel').textContent='🚩 بدأت الرحلة: '+fmtAr(sd);
+    }
 }
 
 // Streak
@@ -619,10 +626,12 @@ window.addEventListener('beforeinstallprompt',function(e){
     deferredPrompt=e;
     byId('installBtn').style.display='flex';
     console.log('📲 PWA install ready — click the install button');
-    // Auto-show on mobile after 2 seconds
+    // Auto-show install hint only if button not already clicked in 10s
     setTimeout(function(){
-        if(deferredPrompt) toast('📲 اضغط على زر التثبيت في الأعلى لتثبيت التطبيق!');
-    },3000);
+        if(deferredPrompt && byId('installBtn').style.display === 'flex') {
+            // Don't auto-toast, just keep button visible
+        }
+    },10000);
 });
 
 byId('installBtn').addEventListener('click',async function(){
