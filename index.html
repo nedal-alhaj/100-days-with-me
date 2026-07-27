@@ -123,6 +123,14 @@
         .btn-primary { background:linear-gradient(135deg,var(--accent),#7c3aed); color:white; box-shadow:0 4px 16px var(--accent-glow); }
         .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 24px var(--accent-glow); }
         .btn-primary:active { transform:translateY(0); }
+        .btn-secondary { background:var(--bg-form); color:var(--text); border:1px solid var(--border); }
+        .btn-secondary:hover { border-color:var(--accent); }
+        .btn-danger { background:var(--danger-bg); color:var(--danger); border:1px solid var(--danger); }
+        .btn-danger:hover { background:var(--danger); color:#fff; }
+        .btn + .btn { margin-top:10px; }
+        .settings-note { font-size:0.82rem; color:var(--text-secondary); margin-bottom:14px; line-height:1.7; }
+        .settings-note strong { color:var(--text); }
+        .settings-divider { height:1px; background:var(--border); margin:18px 0 14px; }
         .today-status { text-align:center; color:var(--success); font-weight:600; font-size:0.9rem; margin-top:10px; display:none; }
         .today-status.show { display:block; }
         .calendar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -334,6 +342,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Section: Settings -->
+    <div class="section" id="sectionSettings">
+        <div class="card">
+            <h2>⚙️ إدارة البيانات</h2>
+            <p class="settings-note" id="settingsSummary"></p>
+            <button class="btn btn-secondary" id="exportBtn">⬇️ تنزيل نسخة احتياطية</button>
+            <button class="btn btn-secondary" id="importBtn">⬆️ استعادة من نسخة احتياطية</button>
+            <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+
+            <div class="settings-divider"></div>
+
+            <p class="settings-note">
+                <strong>♻️ ابدأ رحلة جديدة:</strong> يحذف كل الأيام المسجّلة ويعيد العدّاد إلى
+                <strong>اليوم #1</strong> بتاريخ اليوم. لا يمكن التراجع — خُذ نسخة احتياطية أولاً.
+            </p>
+            <button class="btn btn-danger" id="resetBtn">♻️ ابدأ رحلة جديدة من اليوم</button>
+        </div>
+    </div>
 </div>
 
 <!-- Toast -->
@@ -349,6 +376,9 @@
     </button>
     <button class="nav-item" data-section="sectionStats">
         <span class="nav-icon">📊</span><span>إحصائيات</span>
+    </button>
+    <button class="nav-item" data-section="sectionSettings">
+        <span class="nav-icon">⚙️</span><span>إعدادات</span>
     </button>
 </nav>
 
@@ -584,7 +614,62 @@ function jDel(){
     refreshAll();toast('🗑️ تم حذف تسجيل اليوم');
 }
 
-function refreshAll(){stRow();calRender();stPanel();}
+// Settings / Data management
+function setSummary(){
+    var n=Object.keys(appData.days).length;
+    var txt='📋 عدد الأيام المسجّلة: <strong>'+n+'</strong>';
+    if(appData.startDate){
+        txt+='<br>🚩 تاريخ بداية الرحلة الحالية: <strong>'+fmtAr(new Date(appData.startDate+'T00:00:00'))+'</strong>';
+    }else{
+        txt+='<br>🚩 لم تبدأ الرحلة بعد — أول يوم تسجّله هو اليوم #1.';
+    }
+    byId('settingsSummary').innerHTML=txt;
+}
+
+function exportData(){
+    var payload={version:1,exportedAt:new Date().toISOString(),days:appData.days,startDate:appData.startDate};
+    var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download='100days-backup-'+getDS(new Date())+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},2000);
+    toast('⬇️ تم تنزيل النسخة الاحتياطية');
+}
+
+function importData(file){
+    var rd=new FileReader();
+    rd.onload=function(){
+        var d;
+        try{d=JSON.parse(rd.result);}catch(e){toast('⚠️ الملف غير صالح');return;}
+        if(!d||typeof d!=='object'||!d.days||typeof d.days!=='object'){toast('⚠️ الملف لا يحتوي بيانات التطبيق');return;}
+        var n=Object.keys(d.days).length;
+        if(!confirm('سيتم استبدال بياناتك الحالية بـ '+n+' يوم من الملف.\n\nهل تريد المتابعة؟'))return;
+        appData={days:d.days,startDate:d.startDate||null,notificationsGranted:appData.notificationsGranted};
+        if(!appData.startDate&&n>0)appData.startDate=Object.keys(appData.days).sort()[0];
+        sv();jLoad();refreshAll();
+        toast('⬆️ تمت استعادة النسخة الاحتياطية');
+    };
+    rd.onerror=function(){toast('⚠️ تعذّرت قراءة الملف');};
+    rd.readAsText(file);
+}
+
+function resetJourney(){
+    var n=Object.keys(appData.days).length;
+    if(!confirm('سيتم حذف '+n+' يوم مسجّل نهائياً، وتبدأ الرحلة من اليوم #1 بتاريخ اليوم.\n\nهل أنت متأكد؟'))return;
+    if(!confirm('تأكيد أخير ⚠️\nلا يمكن التراجع عن هذه الخطوة بعد التنفيذ.\n\nمتابعة؟'))return;
+    todayStr=getDS(new Date());
+    appData={days:{},startDate:todayStr,notificationsGranted:appData.notificationsGranted};
+    sv();
+    calendarMonth=new Date().getMonth();
+    calendarYear=new Date().getFullYear();
+    currentRating=0;
+    jLoad();refreshAll();
+    navTo('sectionJournal');
+    toast('♻️ تمت إعادة الضبط — اليوم #1 من 100 يبدأ اليوم!');
+}
+
+function refreshAll(){stRow();calRender();stPanel();setSummary();}
 
 // Navigation
 function navTo(id){
@@ -596,6 +681,7 @@ function navTo(id){
     document.querySelector('[data-section="'+id+'"]').classList.add('active');
     if(id==='sectionCalendar')calRender();
     if(id==='sectionStats')stPanel();
+    if(id==='sectionSettings')setSummary();
 }
 
 // Notifications
@@ -684,6 +770,13 @@ byId('themeToggle').addEventListener('click',thToggle);
 byId('startJourneyBtn').addEventListener('click',dismissWelcome);
 byId('saveEntryBtn').addEventListener('click',jSave);
 byId('deleteEntryBtn').addEventListener('click',jDel);
+byId('exportBtn').addEventListener('click',exportData);
+byId('resetBtn').addEventListener('click',resetJourney);
+byId('importBtn').addEventListener('click',function(){byId('importFile').click();});
+byId('importFile').addEventListener('change',function(){
+    if(this.files&&this.files[0])importData(this.files[0]);
+    this.value='';
+});
 
 var stars=document.querySelectorAll('#ratingStars .star');
 for(var i=0;i<stars.length;i++){
@@ -713,7 +806,7 @@ if('serviceWorker' in navigator){
 
 // Init
 function init(){
-    ld();thLoad();jLoad();stRow();calRender();stPanel();
+    ld();thLoad();jLoad();stRow();calRender();stPanel();setSummary();
     // Skip welcome screen if already installed as PWA (standalone mode)
     if(window.matchMedia('(display-mode: standalone)').matches){
         localStorage.setItem('100days_welcome','1');

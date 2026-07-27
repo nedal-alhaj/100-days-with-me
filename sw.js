@@ -1,5 +1,5 @@
 // Service Worker for "100 يوم مع حالي" PWA
-const CACHE_NAME = '100days-v4';
+const CACHE_NAME = '100days-v5';
 
 // Core assets to cache on install
 const PRECACHE_ASSETS = [
@@ -13,7 +13,7 @@ const PRECACHE_ASSETS = [
 
 // ── Install: precache core assets ──
 self.addEventListener('install', (event) => {
-  console.log('SW: installing v4...');
+  console.log('SW: installing v5...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return Promise.allSettled(
@@ -27,7 +27,7 @@ self.addEventListener('install', (event) => {
 
 // ── Activate: clean old caches ──
 self.addEventListener('activate', (event) => {
-  console.log('SW: activating v4...');
+  console.log('SW: activating v5...');
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
@@ -81,4 +81,4 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-console.log('SW: v4 ready!');
+console.log('SW: v5 ready!');
