@@ -106,15 +106,53 @@
             font-family:inherit; font-size:0.95rem; resize:vertical; transition:border var(--transition);
         }
         textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
-        .rating-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-        .rating-stars { display:flex; gap:2px; direction:ltr; flex-wrap:wrap; }
-        .rating-stars .star { font-size:1.6rem; cursor:pointer; color:var(--text-muted); transition:all 0.15s ease; user-select:none; }
-        .rating-stars .star.active { color:var(--gold); }
-        .rating-stars .star:hover { transform:scale(1.2); }
-        .rating-number { font-weight:800; font-size:1.3rem; min-width:28px; text-align:center; color:var(--gold); }
-        .checkbox-group { display:flex; align-items:center; gap:10px; }
-        .checkbox-group input[type="checkbox"] { width:22px; height:22px; accent-color:var(--accent); cursor:pointer; }
-        .checkbox-group label { margin-bottom:0; cursor:pointer; font-size:0.9rem; }
+        .name-input {
+            width:100%; background:var(--bg-form); border:1px solid var(--border);
+            border-radius:var(--radius-sm); color:var(--text); padding:11px 12px;
+            font-family:inherit; font-size:0.95rem; transition:border var(--transition);
+        }
+        .name-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+        /* ── Track sliders (daily 0-10 score per track) ── */
+        .track-row { margin-bottom:18px; }
+        .track-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; }
+        .track-head .track-title { font-size:0.92rem; font-weight:700; display:flex; align-items:center; gap:6px; min-width:0; }
+        .track-head .track-title .t-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .track-head .track-val { font-size:1.35rem; font-weight:800; min-width:34px; text-align:center; flex-shrink:0; }
+        .track-slider {
+            -webkit-appearance:none; appearance:none; width:100%; height:8px;
+            border-radius:4px; background:var(--bg-form); outline:none; cursor:pointer;
+            border:1px solid var(--border); direction:ltr;
+        }
+        .track-slider::-webkit-slider-thumb {
+            -webkit-appearance:none; appearance:none; width:26px; height:26px; border-radius:50%;
+            background:currentColor; cursor:pointer; border:3px solid var(--bg-card);
+            box-shadow:0 2px 8px rgba(0,0,0,0.35);
+        }
+        .track-slider::-moz-range-thumb {
+            width:22px; height:22px; border-radius:50%; background:currentColor;
+            cursor:pointer; border:3px solid var(--bg-card); box-shadow:0 2px 8px rgba(0,0,0,0.35);
+        }
+        .track-scale { display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-muted); margin-top:2px; direction:ltr; }
+        .day-average {
+            display:flex; align-items:center; justify-content:space-between; gap:8px;
+            background:var(--bg-form); border:1px solid var(--border); border-radius:var(--radius-sm);
+            padding:12px 14px; margin:4px 0 18px;
+        }
+        .day-average .avg-label { font-size:0.85rem; color:var(--text-secondary); font-weight:600; }
+        .day-average .avg-value {
+            font-size:1.6rem; font-weight:800;
+            background:linear-gradient(135deg,var(--accent),var(--gold));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        /* ── Per-track statistics cards ── */
+        .track-stat { background:var(--bg-form); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px; }
+        .track-stat .ts-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:8px; }
+        .track-stat .ts-name { font-size:0.92rem; font-weight:700; display:flex; align-items:center; gap:6px; min-width:0; }
+        .track-stat .ts-name span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .track-stat .ts-avg { font-size:1.35rem; font-weight:800; flex-shrink:0; }
+        .track-stat .ts-bar { height:10px; border-radius:5px; background:var(--border); overflow:hidden; }
+        .track-stat .ts-bar i { display:block; height:100%; border-radius:5px; transition:width 0.6s ease; }
+        .track-stat .ts-meta { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:0.75rem; color:var(--text-secondary); margin-top:8px; }
         .btn {
             display:inline-flex; align-items:center; justify-content:center; gap:8px;
             padding:12px 28px; border-radius:50px; border:none; font-family:inherit;
@@ -149,11 +187,14 @@
         .day-cell:hover { border-color:var(--accent); }
         .day-cell.other-month { opacity:0.3; pointer-events:none; }
         .day-cell.today { border:2px solid var(--accent); box-shadow:0 0 12px var(--accent-glow); }
-        .day-cell.goal-done { background:var(--success-bg); border-color:var(--success); }
-        .day-cell.goal-missed { background:var(--danger-bg); border-color:var(--danger); }
-        .day-cell .dot { width:6px; height:6px; border-radius:50%; margin-top:2px; }
-        .day-cell.goal-done .dot { background:var(--success); }
-        .day-cell.goal-missed .dot { background:var(--danger); }
+        /* Heatmap levels — rgba over the card background, so both themes work unchanged */
+        .day-cell.lvl0 { background:rgba(239,68,68,0.18); }
+        .day-cell.lvl1 { background:rgba(34,197,94,0.18); }
+        .day-cell.lvl2 { background:rgba(34,197,94,0.35); }
+        .day-cell.lvl3 { background:rgba(34,197,94,0.52); }
+        .day-cell.lvl4 { background:rgba(34,197,94,0.70); }
+        .heat-legend { display:flex; align-items:center; gap:6px; margin-top:12px; justify-content:center; font-size:0.72rem; color:var(--text-secondary); flex-wrap:wrap; }
+        .heat-legend i { width:16px; height:16px; border-radius:4px; display:inline-block; }
         .stats-detail { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
         .stat-item { background:var(--bg-form); border-radius:var(--radius-sm); padding:12px; text-align:center; }
         .stat-item .val { font-size:1.5rem; font-weight:800; color:var(--accent); }
@@ -201,8 +242,8 @@
             .badges-row { gap:6px; }
             .badge { padding:6px 10px; font-size:0.72rem; }
             .day-cell { font-size:0.72rem; border-radius:8px; }
-            .stats-detail { grid-template-columns:1fr; }
-            .rating-stars .star { font-size:1.3rem; }
+            .stats-detail { grid-template-columns:1fr 1fr; }
+            .track-head .track-title { font-size:0.85rem; }
         }
     </style>
 </head>
@@ -237,12 +278,12 @@
             <div class="stat-label">🔥 أيام متتالية</div>
         </div>
         <div class="stat-card">
-            <div class="stat-value" id="completionPercent">0%</div>
-            <div class="stat-label">📊 نسبة الإنجاز</div>
+            <div class="stat-value" id="overallAvgTop">0</div>
+            <div class="stat-label">📊 متوسط اليوم</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="daysDone">0</div>
-            <div class="stat-label">✅ أيام مكتملة</div>
+            <div class="stat-label">✅ أيام كاملة</div>
         </div>
     </div>
 
@@ -262,28 +303,16 @@
         <div class="card">
             <h2>📝 تدوين اليوم</h2>
             <div class="today-status" id="todayStatus"></div>
+            <div id="tracksInputs"></div>
+
+            <div class="day-average">
+                <span class="avg-label">📊 تقييم اليوم (متوسط الثلاثة)</span>
+                <span class="avg-value" id="dayAvgValue">0.0</span>
+            </div>
+
             <div class="form-group">
-                <label>ماذا حدث اليوم؟ كيف كان شعورك؟</label>
+                <label>📝 خواطر اليوم <span style="font-weight:400;color:var(--text-muted)">(اختياري)</span></label>
                 <textarea id="journalText" placeholder="اكتب هنا خواطرك وأفكارك لهذا اليوم..."></textarea>
-            </div>
-            <div class="form-group">
-                <label>تقييم اليوم (1-10)</label>
-                <div class="rating-row">
-                    <div class="rating-stars" id="ratingStars">
-                        <span class="star" data-rating="1">⭐</span><span class="star" data-rating="2">⭐</span>
-                        <span class="star" data-rating="3">⭐</span><span class="star" data-rating="4">⭐</span>
-                        <span class="star" data-rating="5">⭐</span><span class="star" data-rating="6">⭐</span>
-                        <span class="star" data-rating="7">⭐</span><span class="star" data-rating="8">⭐</span>
-                        <span class="star" data-rating="9">⭐</span><span class="star" data-rating="10">⭐</span>
-                    </div>
-                    <span class="rating-number" id="ratingDisplay">0</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="goalCheck">
-                    <label for="goalCheck">✅ أنجزت هدفي الرئيسي لهذا اليوم</label>
-                </div>
             </div>
             <button class="btn btn-primary" id="saveEntryBtn">💾 حفظ اليوم</button>
             <button class="btn" id="deleteEntryBtn" style="background:var(--danger-bg);color:var(--danger);margin-top:8px;margin-bottom:16px;display:none;">🗑️ حذف تسجيل اليوم</button>
@@ -306,8 +335,16 @@
                 <span>أحد</span><span>إثنين</span><span>ثلاثاء</span><span>أربعاء</span><span>خميس</span><span>جمعة</span><span>سبت</span>
             </div>
             <div class="days-grid" id="daysGrid"></div>
-            <div style="display:flex;gap:16px;margin-top:12px;font-size:0.75rem;justify-content:center;color:var(--text-secondary);flex-wrap:wrap;">
-                <span>🟢 أنجزت الهدف</span><span>🔴 فاتني الهدف</span><span>⚪ لم أسجل</span>
+            <div class="heat-legend">
+                <span>يوم ضعيف</span>
+                <i class="lvl1" style="background:rgba(34,197,94,0.18)"></i>
+                <i class="lvl2" style="background:rgba(34,197,94,0.35)"></i>
+                <i class="lvl3" style="background:rgba(34,197,94,0.52)"></i>
+                <i class="lvl4" style="background:rgba(34,197,94,0.70)"></i>
+                <span>يوم قوي</span>
+                <span style="margin-inline-start:10px">·</span>
+                <i style="background:rgba(239,68,68,0.18)"></i><span>يوم صفر</span>
+                <i style="background:var(--bg-form);border:1px solid var(--border)"></i><span>لم أسجل</span>
             </div>
         </div>
     </div>
@@ -315,36 +352,49 @@
     <!-- Section: Statistics -->
     <div class="section" id="sectionStats">
         <div class="card">
-            <h2>📊 الإحصائيات</h2>
+            <h2>📊 نظرة عامة</h2>
             <div class="stats-detail">
                 <div class="stat-item">
                     <div class="val" id="statTotalEntries">0</div>
-                    <div class="lbl">إجمالي الأيام المسجلة</div>
+                    <div class="lbl">أيام مسجّلة</div>
                 </div>
                 <div class="stat-item">
-                    <div class="val" id="statAvgRating">0</div>
-                    <div class="lbl">متوسط التقييم</div>
+                    <div class="val" id="statOverallAvg">0</div>
+                    <div class="lbl">المتوسط العام /10</div>
+                </div>
+                <div class="stat-item">
+                    <div class="val" id="statFullDays">0</div>
+                    <div class="lbl">أيام كاملة (الثلاثة)</div>
                 </div>
                 <div class="stat-item">
                     <div class="val" id="statBestDay">-</div>
-                    <div class="lbl">أفضل يوم (تقييم)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="val" id="statGoalRate">0%</div>
-                    <div class="lbl">نسبة تحقيق الأهداف</div>
+                    <div class="lbl" id="statBestDayLabel">أفضل يوم</div>
                 </div>
             </div>
-            <div class="top-days">
-                <h4>🏆 أفضل 3 أيام</h4>
-                <div id="topDaysList">
-                    <p style="color:var(--text-muted);text-align:center;padding:16px">لا توجد بيانات كافية بعد</p>
-                </div>
+        </div>
+
+        <div class="card">
+            <h2>🎯 لكل مسار</h2>
+            <div id="trackStatsList"></div>
+        </div>
+
+        <div class="card">
+            <h2>🏆 أفضل 3 أيام</h2>
+            <div id="topDaysList">
+                <p style="color:var(--text-muted);text-align:center;padding:16px">لا توجد بيانات كافية بعد</p>
             </div>
         </div>
     </div>
 
     <!-- Section: Settings -->
     <div class="section" id="sectionSettings">
+        <div class="card">
+            <h2>🎯 مساراتي الثلاثة</h2>
+            <p class="settings-note">عدّل الأسماء كما تحب — تظهر في التدوين والإحصائيات. السكورات المسجّلة لا تتأثر.</p>
+            <div id="trackNameInputs"></div>
+            <button class="btn btn-secondary" id="saveNamesBtn">💾 حفظ الأسماء</button>
+        </div>
+
         <div class="card">
             <h2>⚙️ إدارة البيانات</h2>
             <p class="settings-note" id="settingsSummary"></p>
@@ -388,9 +438,16 @@
 
 var STORAGE_KEY = '100days_app';
 var THEME_KEY = '100days_theme';
+var SCHEMA_VERSION = 2;
 
-var appData = { days:{}, startDate:null, notificationsGranted:false };
-var currentRating = 0;
+// Single source of truth for the three tracked commitments.
+var TRACKS = [
+    { id:'ai',  emoji:'🤖',  def:'تعلم AI',           color:'#6366f1' },
+    { id:'en',  emoji:'🇬🇧', def:'دراسة إنجليزي',      color:'#06b6d4' },
+    { id:'uni', emoji:'💼',  def:'العميل في Unicars', color:'#f59e0b' }
+];
+
+var appData = { v:SCHEMA_VERSION, days:{}, startDate:null, trackNames:{}, notificationsGranted:false };
 var calendarMonth = new Date().getMonth();
 var calendarYear = new Date().getFullYear();
 var todayStr = getDS(new Date());
@@ -405,11 +462,87 @@ function fmtAr(d) {
     return d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();
 }
 
+// ── Track helpers ──
+function trackName(id){
+    var n=appData.trackNames&&appData.trackNames[id];
+    if(n&&String(n).trim())return String(n).trim();
+    for(var i=0;i<TRACKS.length;i++)if(TRACKS[i].id===id)return TRACKS[i].def;
+    return id;
+}
+// Always returns a full {ai,en,uni} object — guards against missing/partial entries.
+function getScores(e){
+    var s={};
+    for(var i=0;i<TRACKS.length;i++){
+        var v=e&&e.scores?e.scores[TRACKS[i].id]:0;
+        v=parseInt(v,10);
+        s[TRACKS[i].id]=(isNaN(v)||v<0)?0:(v>10?10:v);
+    }
+    return s;
+}
+function dayAvg(e){
+    var s=getScores(e),t=0;
+    for(var i=0;i<TRACKS.length;i++)t+=s[TRACKS[i].id];
+    return t/TRACKS.length;
+}
+// A "full day" = every track was worked on at all (score > 0).
+function isFullDay(e){
+    var s=getScores(e);
+    for(var i=0;i<TRACKS.length;i++)if(s[TRACKS[i].id]<=0)return false;
+    return true;
+}
+function sortedKeys(){return Object.keys(appData.days).sort();}
+function overallAvg(){
+    var k=sortedKeys();
+    if(k.length===0)return 0;
+    var t=0;
+    for(var i=0;i<k.length;i++)t+=dayAvg(appData.days[k[i]]);
+    return t/k.length;
+}
+function fullDayCount(){
+    var k=sortedKeys(),c=0;
+    for(var i=0;i<k.length;i++)if(isFullDay(appData.days[k[i]]))c++;
+    return c;
+}
+// Per-track aggregate: days worked, average over worked days, best score, longest run.
+function trackStats(id){
+    var k=sortedKeys(),days=0,sum=0,best=0,longest=0,run=0,prev=null;
+    for(var i=0;i<k.length;i++){
+        var v=getScores(appData.days[k[i]])[id];
+        if(v>0){
+            days++;sum+=v;
+            if(v>best)best=v;
+            // Only extend the run when the previous worked day was the calendar day before.
+            var cur=new Date(k[i]+'T00:00:00');
+            if(prev&&Math.round((cur-prev)/86400000)===1)run++;else run=1;
+            if(run>longest)longest=run;
+            prev=cur;
+        }
+    }
+    return {days:days,avg:days>0?sum/days:0,best:best,longest:longest,total:k.length};
+}
+
 // Load/Save
+function migrate(){
+    if(appData.v===SCHEMA_VERSION)return;
+    for(var k in appData.days){
+        var e=appData.days[k];
+        if(!e||typeof e!=='object'){delete appData.days[k];continue;}
+        if(!e.scores){
+            e.scores={ai:0,en:0,uni:0};
+            // v1 had a single overall rating with no per-track breakdown — keep it, don't invent scores.
+            if(typeof e.rating==='number'&&e.rating>0)e.legacyRating=e.rating;
+            delete e.rating;delete e.goalCompleted;
+        }
+    }
+    appData.v=SCHEMA_VERSION;
+    sv();
+}
 function ld() {
     var r = localStorage.getItem(STORAGE_KEY);
-    if(r){try{appData=JSON.parse(r);}catch(e){appData={days:{},startDate:null,notificationsGranted:false};}}
+    if(r){try{appData=JSON.parse(r);}catch(e){appData={v:SCHEMA_VERSION,days:{},startDate:null,trackNames:{},notificationsGranted:false};}}
     if(!appData.days)appData.days={};
+    if(!appData.trackNames)appData.trackNames={};
+    migrate();
     if(!appData.startDate&&Object.keys(appData.days).length>0)appData.startDate=Object.keys(appData.days).sort()[0];
     todayStr=getDS(new Date());
 }
@@ -454,26 +587,13 @@ function updateProgress(){
     }
 }
 
-// Streak
+// Streak: consecutive full days counting back from today.
+// Today not being logged yet doesn't break the streak — yesterday's run still counts.
 function streak(){
-    var t=new Date(),s=0,d=new Date(t);
-    while(true){
-        var ds=getDS(d),e=appData.days[ds];
-        if(e&&e.goalCompleted){s++;d.setDate(d.getDate()-1);}
-        else{if(ds===todayStr&&(!e||!e.goalCompleted))break;if(ds!==todayStr)break;break;}
-    }
+    var d=new Date(),s=0;
+    if(!isFullDay(appData.days[getDS(d)]))d.setDate(d.getDate()-1);
+    while(isFullDay(appData.days[getDS(d)])){s++;d.setDate(d.getDate()-1);}
     return s;
-}
-
-function pct(){
-    var t=new Date();
-    if(!appData.startDate){var k=Object.keys(appData.days).sort();if(k.length===0)return 0;appData.startDate=k[0];sv();}
-    var start=new Date(appData.startDate+'T00:00:00');
-    var total=Math.floor((t-start)/(1000*60*60*24))+1;
-    if(total<=0)return 0;
-    var done=0;
-    for(var k in appData.days){if(appData.days[k].goalCompleted)done++;}
-    return Math.round((done/total)*100);
 }
 
 // Badges
@@ -488,17 +608,25 @@ function bgUpdate(st){
 
 // Stats Row
 function stRow(){
-    var st=streak(),pc=pct();
-    var dd=0;for(var k in appData.days){if(appData.days[k].goalCompleted)dd++;}
+    var st=streak();
     byId('streakCount').textContent=st;
-    byId('completionPercent').textContent=pc+'%';
-    byId('daysDone').textContent=dd;
+    byId('overallAvgTop').textContent=overallAvg().toFixed(1);
+    byId('daysDone').textContent=fullDayCount();
     byId('streakCard').classList.toggle('streak-active',st>0);
     bgUpdate(st);
     updateProgress();
 }
 
 // Calendar
+// Maps a day's average (0-10) onto the 5 heatmap shades.
+// Quartile cuts, because 3 tracks make averages land on thirds (3.33, 6.67).
+function heatLevel(avg){
+    if(avg<=0)return 0;
+    if(avg<=2.5)return 1;
+    if(avg<=5)return 2;
+    if(avg<=7.5)return 3;
+    return 4;
+}
 function calRender(){
     var mn=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
     byId('monthLabel').textContent=mn[calendarMonth]+' '+calendarYear;
@@ -517,14 +645,13 @@ function calRender(){
         c.textContent=d;
         if(ds===tl)c.classList.add('today');
         var en=appData.days[ds];
-        if(en){
-            c.classList.add(en.goalCompleted?'goal-done':'goal-missed');
-            var dot=document.createElement('span');dot.className='dot';c.appendChild(dot);
-        }
+        if(en)c.classList.add('lvl'+heatLevel(dayAvg(en)));
         (function(ds,en){
             c.addEventListener('click',function(){
-                if(en&&en.journal)toast(en.journal.substring(0,60)+(en.journal.length>60?'...':''));
-                else if(en)toast('تقييم '+en.rating+'/10 (الهدف: '+(en.goalCompleted?'✅':'❌')+')');
+                if(!en){toast('⚪ '+fmtAr(new Date(ds+'T00:00:00'))+' — لم تسجّل هذا اليوم');return;}
+                var s=getScores(en),parts=[];
+                for(var i=0;i<TRACKS.length;i++)parts.push(TRACKS[i].emoji+' '+s[TRACKS[i].id]);
+                toast(parts.join('  ·  ')+'  =  '+dayAvg(en).toFixed(1)+'/10');
             });
         })(ds,en);
         g.appendChild(c);
@@ -534,90 +661,192 @@ function calRender(){
 }
 
 // Stats Panel
+function esc(s){
+    return String(s).replace(/[&<>"]/g,function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+}
+
 function stPanel(){
-    var entries=Object.keys(appData.days).map(function(k){return [k,appData.days[k]];});
+    var keys=sortedKeys();
+    var entries=keys.map(function(k){return [k,appData.days[k]];});
     var total=entries.length;
+
+    // ── Overview ──
     byId('statTotalEntries').textContent=total;
-    var ratings=[];for(var i=0;i<entries.length;i++){if(entries[i][1].rating>0)ratings.push(entries[i][1].rating);}
-    byId('statAvgRating').textContent=ratings.length>0?(ratings.reduce(function(a,b){return a+b;},0)/ratings.length).toFixed(1):'0';
-    var best=null;for(var i=0;i<entries.length;i++){if(entries[i][1].rating>0&&(!best||entries[i][1].rating>best[1].rating))best=entries[i];}
-    byId('statBestDay').textContent=best?best[1].rating+'/10':'-';
-    var ge=0;for(var i=0;i<entries.length;i++){if(entries[i][1].goalCompleted)ge++;}
-    byId('statGoalRate').textContent=total>0?Math.round((ge/total)*100)+'%':'0%';
-    var top=entries.filter(function(e){return e[1].rating>0;}).sort(function(a,b){return b[1].rating-a[1].rating;}).slice(0,3);
+    byId('statOverallAvg').textContent=overallAvg().toFixed(1);
+    byId('statFullDays').textContent=fullDayCount();
+    var best=null;
+    for(var i=0;i<entries.length;i++){
+        if(!best||dayAvg(entries[i][1])>dayAvg(best[1]))best=entries[i];
+    }
+    if(best&&dayAvg(best[1])>0){
+        byId('statBestDay').textContent=dayAvg(best[1]).toFixed(1);
+        byId('statBestDayLabel').textContent='أفضل يوم — '+fmtAr(new Date(best[0]+'T00:00:00'));
+    }else{
+        byId('statBestDay').textContent='-';
+        byId('statBestDayLabel').textContent='أفضل يوم';
+    }
+
+    // ── Per-track breakdown ──
+    byId('trackStatsList').innerHTML=TRACKS.map(function(t){
+        var s=trackStats(t.id);
+        var pctBar=Math.round((s.avg/10)*100);
+        return '<div class="track-stat">'
+            +'<div class="ts-head">'
+                +'<div class="ts-name">'+t.emoji+' <span>'+esc(trackName(t.id))+'</span></div>'
+                +'<div class="ts-avg" style="color:'+t.color+'">'+s.avg.toFixed(1)+'<span style="font-size:0.8rem;color:var(--text-muted)">/10</span></div>'
+            +'</div>'
+            +'<div class="ts-bar"><i style="width:'+pctBar+'%;background:'+t.color+'"></i></div>'
+            +'<div class="ts-meta">'
+                +'<span>📅 اشتغلت: '+s.days+' من '+s.total+'</span>'
+                +'<span>🔥 أطول سلسلة: '+s.longest+'</span>'
+                +'<span>⭐ أفضل: '+s.best+'/10</span>'
+            +'</div>'
+        +'</div>';
+    }).join('');
+
+    // ── Top 3 days by average ──
+    var top=entries.filter(function(e){return dayAvg(e[1])>0;})
+                   .sort(function(a,b){return dayAvg(b[1])-dayAvg(a[1]);}).slice(0,3);
     var list=byId('topDaysList');
     if(top.length===0){
         list.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:16px">لا توجد بيانات كافية بعد</p>';
     }else{
         var medals=['🥇','🥈','🥉'];
         list.innerHTML=top.map(function(e,i){
-            return '<div class="top-day-item"><div class="day-rank">'+medals[i]+'</div><div class="day-info"><div class="day-date">'+fmtAr(new Date(e[0]+'T00:00:00'))+'</div><div class="day-excerpt">'+(e[1].journal?e[1].journal.substring(0,40)+(e[1].journal.length>40?'...':''):'بدون ملاحظات')+'</div></div><div class="day-rating">'+e[1].rating+'/10</div></div>';
+            var s=getScores(e[1]),detail=[];
+            for(var j=0;j<TRACKS.length;j++)detail.push(TRACKS[j].emoji+' '+s[TRACKS[j].id]);
+            return '<div class="top-day-item"><div class="day-rank">'+medals[i]+'</div>'
+                +'<div class="day-info"><div class="day-date">'+fmtAr(new Date(e[0]+'T00:00:00'))+'</div>'
+                +'<div class="day-excerpt">'+detail.join(' · ')+'</div></div>'
+                +'<div class="day-rating">'+dayAvg(e[1]).toFixed(1)+'</div></div>';
         }).join('');
     }
 }
 
 // Journal
+// Builds the three sliders once; jLoad() only sets their values afterwards.
+function buildTrackInputs(){
+    byId('tracksInputs').innerHTML=TRACKS.map(function(t){
+        return '<div class="track-row" style="color:'+t.color+'">'
+            +'<div class="track-head">'
+                +'<span class="track-title" style="color:var(--text)">'+t.emoji+' <span class="t-name" id="lbl_'+t.id+'"></span></span>'
+                +'<span class="track-val" id="val_'+t.id+'" style="color:'+t.color+'">0</span>'
+            +'</div>'
+            +'<input type="range" class="track-slider" id="sl_'+t.id+'" min="0" max="10" step="1" value="0" style="accent-color:'+t.color+'">'
+            +'<div class="track-scale"><span>0</span><span>5</span><span>10</span></div>'
+        +'</div>';
+    }).join('');
+    TRACKS.forEach(function(t){
+        byId('sl_'+t.id).addEventListener('input',function(){
+            byId('val_'+t.id).textContent=this.value;
+            updateDayAvgDisplay();
+        });
+    });
+    renderTrackLabels();
+}
+
+function renderTrackLabels(){
+    TRACKS.forEach(function(t){byId('lbl_'+t.id).textContent=trackName(t.id);});
+}
+
+function readSliders(){
+    var s={};
+    TRACKS.forEach(function(t){s[t.id]=parseInt(byId('sl_'+t.id).value,10)||0;});
+    return s;
+}
+
+function setSliders(scores){
+    TRACKS.forEach(function(t){
+        var v=scores[t.id]||0;
+        byId('sl_'+t.id).value=v;
+        byId('val_'+t.id).textContent=v;
+    });
+    updateDayAvgDisplay();
+}
+
+function updateDayAvgDisplay(){
+    byId('dayAvgValue').textContent=dayAvg({scores:readSliders()}).toFixed(1);
+}
+
 function jLoad(){
     var e=appData.days[todayStr];
     if(e){
         byId('journalText').value=e.journal||'';
-        setRating(e.rating||0);
-        byId('goalCheck').checked=e.goalCompleted||false;
+        setSliders(getScores(e));
         byId('todayStatus').classList.add('show');
         byId('todayStatus').textContent='✓ تم تسجيل اليوم بنجاح! يمكنك التعديل وإعادة الحفظ 🎉';
         byId('deleteEntryBtn').style.display='block';
         byId('saveEntryBtn').textContent='🔄 تحديث اليوم';
     }else{
         byId('journalText').value='';
-        setRating(0);
-        byId('goalCheck').checked=false;
+        setSliders({});
         byId('todayStatus').classList.remove('show');
         byId('deleteEntryBtn').style.display='none';
         byId('saveEntryBtn').textContent='💾 حفظ اليوم';
     }
 }
 
-function setRating(r){
-    currentRating=r;
-    byId('ratingDisplay').textContent=r;
-    var stars=document.querySelectorAll('#ratingStars .star');
-    for(var i=0;i<stars.length;i++){
-        stars[i].classList.toggle('active',parseInt(stars[i].dataset.rating)<=r);
-    }
-}
-
 function jSave(){
     var j=byId('journalText').value.trim();
-    var r=currentRating;
-    var g=byId('goalCheck').checked;
-    if(!j&&r===0&&!g){toast('الرجاء إدخال ملاحظات أو تقييم على الأقل');return;}
+    var sc=readSliders();
+    var wasFull=isFullDay(appData.days[todayStr]);
+    // A genuine all-zero day is valid data for the heatmap — just confirm it wasn't a misfire.
+    if(dayAvg({scores:sc})===0&&!j){
+        if(!confirm('كل السكورات صفر ولا يوجد نص.\n\nتسجّل اليوم كـ "يوم صفر"؟'))return;
+    }
     if(!appData.startDate||todayStr<appData.startDate)appData.startDate=todayStr;
-    appData.days[todayStr]={journal:j,rating:r,goalCompleted:g,savedAt:new Date().toISOString()};
+    appData.days[todayStr]={scores:sc,journal:j,savedAt:new Date().toISOString()};
     sv();refreshAll();
     byId('todayStatus').classList.add('show');
     byId('todayStatus').textContent='✓ تم الحفظ بنجاح! استمر على هذا المنوال 🚀';
     byId('deleteEntryBtn').style.display='block';
     byId('saveEntryBtn').textContent='🔄 تحديث اليوم';
+    toast('✅ تم حفظ اليوم — تقييمك '+dayAvg({scores:sc}).toFixed(1)+'/10');
+    // Announce a badge only on the save that newly completes the day.
     var st=streak();
     var bn={7:'🌟 البداية',21:'🔥 العادة',50:'💪 الالتزام',100:'👑 الأسطورة'};
-    if(bn[st]&&g)setTimeout(function(){toast('🏅 مبروك! حصلت على شارة "'+bn[st]+'"!');},800);
-    toast('✅ تم حفظ اليوم بنجاح!');
-    if(bn[st]&&g)bgUpdate(st);
+    if(bn[st]&&isFullDay(appData.days[todayStr])&&!wasFull){
+        setTimeout(function(){toast('🏅 مبروك! حصلت على شارة "'+bn[st]+'"!');},900);
+    }
 }
 
 function jDel(){
     if(!confirm('هل أنت متأكد من حذف تسجيل اليوم؟'))return;
     delete appData.days[todayStr];sv();
-    byId('journalText').value='';setRating(0);byId('goalCheck').checked=false;currentRating=0;
+    byId('journalText').value='';setSliders({});
     byId('todayStatus').classList.remove('show');byId('deleteEntryBtn').style.display='none';
     byId('saveEntryBtn').textContent='💾 حفظ اليوم';
     refreshAll();toast('🗑️ تم حذف تسجيل اليوم');
 }
 
 // Settings / Data management
+function buildNameInputs(){
+    byId('trackNameInputs').innerHTML=TRACKS.map(function(t){
+        return '<div class="form-group">'
+            +'<label>'+t.emoji+' المسار '+(TRACKS.indexOf(t)+1)+'</label>'
+            +'<input type="text" class="name-input" id="nm_'+t.id+'" maxlength="40" placeholder="'+esc(t.def)+'">'
+        +'</div>';
+    }).join('');
+    fillNameInputs();
+}
+function fillNameInputs(){
+    TRACKS.forEach(function(t){byId('nm_'+t.id).value=trackName(t.id);});
+}
+function saveTrackNames(){
+    TRACKS.forEach(function(t){
+        var v=byId('nm_'+t.id).value.trim();
+        appData.trackNames[t.id]=v||t.def;
+    });
+    sv();fillNameInputs();renderTrackLabels();stPanel();
+    toast('💾 تم حفظ أسماء المسارات');
+}
+
 function setSummary(){
     var n=Object.keys(appData.days).length;
     var txt='📋 عدد الأيام المسجّلة: <strong>'+n+'</strong>';
+    txt+='<br>📊 المتوسط العام: <strong>'+overallAvg().toFixed(1)+'/10</strong>';
     if(appData.startDate){
         txt+='<br>🚩 تاريخ بداية الرحلة الحالية: <strong>'+fmtAr(new Date(appData.startDate+'T00:00:00'))+'</strong>';
     }else{
@@ -627,7 +856,7 @@ function setSummary(){
 }
 
 function exportData(){
-    var payload={version:1,exportedAt:new Date().toISOString(),days:appData.days,startDate:appData.startDate};
+    var payload={v:SCHEMA_VERSION,exportedAt:new Date().toISOString(),days:appData.days,startDate:appData.startDate,trackNames:appData.trackNames};
     var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     var url=URL.createObjectURL(blob);
     var a=document.createElement('a');
@@ -645,9 +874,11 @@ function importData(file){
         if(!d||typeof d!=='object'||!d.days||typeof d.days!=='object'){toast('⚠️ الملف لا يحتوي بيانات التطبيق');return;}
         var n=Object.keys(d.days).length;
         if(!confirm('سيتم استبدال بياناتك الحالية بـ '+n+' يوم من الملف.\n\nهل تريد المتابعة؟'))return;
-        appData={days:d.days,startDate:d.startDate||null,notificationsGranted:appData.notificationsGranted};
+        appData={v:d.v||1,days:d.days,startDate:d.startDate||null,
+                 trackNames:d.trackNames||{},notificationsGranted:appData.notificationsGranted};
+        migrate();
         if(!appData.startDate&&n>0)appData.startDate=Object.keys(appData.days).sort()[0];
-        sv();jLoad();refreshAll();
+        sv();fillNameInputs();renderTrackLabels();jLoad();refreshAll();
         toast('⬆️ تمت استعادة النسخة الاحتياطية');
     };
     rd.onerror=function(){toast('⚠️ تعذّرت قراءة الملف');};
@@ -659,11 +890,12 @@ function resetJourney(){
     if(!confirm('سيتم حذف '+n+' يوم مسجّل نهائياً، وتبدأ الرحلة من اليوم #1 بتاريخ اليوم.\n\nهل أنت متأكد؟'))return;
     if(!confirm('تأكيد أخير ⚠️\nلا يمكن التراجع عن هذه الخطوة بعد التنفيذ.\n\nمتابعة؟'))return;
     todayStr=getDS(new Date());
-    appData={days:{},startDate:todayStr,notificationsGranted:appData.notificationsGranted};
+    // Track names survive a reset — they describe the commitments, not the journey's data.
+    appData={v:SCHEMA_VERSION,days:{},startDate:todayStr,
+             trackNames:appData.trackNames,notificationsGranted:appData.notificationsGranted};
     sv();
     calendarMonth=new Date().getMonth();
     calendarYear=new Date().getFullYear();
-    currentRating=0;
     jLoad();refreshAll();
     navTo('sectionJournal');
     toast('♻️ تمت إعادة الضبط — اليوم #1 من 100 يبدأ اليوم!');
@@ -778,15 +1010,7 @@ byId('importFile').addEventListener('change',function(){
     this.value='';
 });
 
-var stars=document.querySelectorAll('#ratingStars .star');
-for(var i=0;i<stars.length;i++){
-    stars[i].addEventListener('click',function(){setRating(parseInt(this.dataset.rating));});
-    stars[i].addEventListener('mouseenter',function(){
-        var v=parseInt(this.dataset.rating);
-        for(var j=0;j<stars.length;j++)stars[j].classList.toggle('active',parseInt(stars[j].dataset.rating)<=v);
-    });
-}
-byId('ratingStars').addEventListener('mouseleave',function(){setRating(currentRating);});
+byId('saveNamesBtn').addEventListener('click',saveTrackNames);
 
 var nis=document.querySelectorAll('.nav-item');
 for(var i=0;i<nis.length;i++){
@@ -806,7 +1030,9 @@ if('serviceWorker' in navigator){
 
 // Init
 function init(){
-    ld();thLoad();jLoad();stRow();calRender();stPanel();setSummary();
+    ld();thLoad();
+    buildTrackInputs();buildNameInputs();
+    jLoad();refreshAll();
     // Skip welcome screen if already installed as PWA (standalone mode)
     if(window.matchMedia('(display-mode: standalone)').matches){
         localStorage.setItem('100days_welcome','1');
@@ -816,7 +1042,11 @@ function init(){
     } else {
         checkFirst();
     }
-    document.addEventListener('click',function o(){if(Notification.permission==='default')reqNotif();},{once:true});
+    // Guard the API itself — iOS Safari has no Notification outside standalone mode,
+    // and an unguarded reference here throws on the very first tap anywhere in the app.
+    document.addEventListener('click',function o(){
+        if(('Notification' in window)&&Notification.permission==='default')reqNotif();
+    },{once:true});
     setInterval(schedRemind,30*60*1000);
     setTimeout(schedRemind,5000);
 }
